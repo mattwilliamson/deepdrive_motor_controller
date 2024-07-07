@@ -40,8 +40,19 @@ BLDCDriver3PWM driver = BLDCDriver3PWM(32, 33, 25, 22);
 BLDCMotor motor1 = BLDCMotor(15);                          //Also modify the value in BLDMotor() here
 BLDCDriver3PWM driver1 = BLDCDriver3PWM(26, 27, 14, 12);
 
+#include <TonePlayer.h>
+#include <BLDCSpeaker.h>
+#include <BLDCMotor.h>
+#include <RTTTL.h>
+
+BLDCSpeaker speaker = BLDCSpeaker(&motor, 1.5, 10, -12);
+BLDCSpeaker speaker1 = BLDCSpeaker(&motor1, 1.5, 10, -12);
+TonePlayer player;
+// const char rtttl[] PROGMEM = RTTTL_PINK_PANTHER;
+const char rtttl[] PROGMEM = "HarryPot:d=16,o=5,b=125:2p,8p,8b,8e.6,g6,8f#6,4e6,8b6,4a.6,4f#.6,8e.6,g6,8f#6,4d6,8f6,2b,8p,8b,8e.6,g6,8f#6,4e6,8b6,4d7,8c#7,4c7,8g#6,8c.7,b6,8a#6,4f#6,8g6,2e6,8p,8g6,4b6,8g6,4b6,8g6,4c7,8b6,4a#6,8f#6,8g.6,b6,8a#6,4a#,8b,2b6,8p";
+
 //Command Settings
-float target_velocity = 1;                                //Enter "T+speed" in the serial monitor to make the two motors rotate in closed loop
+float target_velocity = -2;                                //Enter "T+speed" in the serial monitor to make the two motors rotate in closed loop
 Commander command = Commander(Serial);                    //For example, to make both motors rotate at a speed of 10rad/s, input "T10"
 void doTarget(char* cmd) { command.scalar(&target_velocity, cmd); }
 
@@ -133,9 +144,9 @@ void setup() {
   motor1.PID_velocity.I = 1.0;
   motor1.PID_velocity.D = 0;
   //Maximum Motor Voltage Limit
-  motor.voltage_limit = 12;                   //When using other power supply voltages, modify the value of voltage_limit here
+  motor.voltage_limit = 3.0;                   //When using other power supply voltages, modify the value of voltage_limit here
   motor.current_limit = .25;
-  motor1.voltage_limit = 12;                  //Also modify the value of voltage_limit here
+  motor1.voltage_limit = 3.0;                  //Also modify the value of voltage_limit here
   motor1.current_limit = .25;
 
   // default value is 300 volts per sec  ~ 0.3V per millisecond
@@ -174,6 +185,14 @@ void setup() {
   Serial.println(F("Motor 2 init."));
   motor1.init();
   motor1.initFOC();
+  player.attachSpeaker(&speaker);
+  player.attachSpeaker(&speaker1);
+
+  Song* song = parseRTTL(rtttl);
+  player.play(song);
+
+  delay(1000);
+
   command.add('T', doTarget, "target velocity");
 
   Serial.println(F("Motor ready."));
@@ -209,16 +228,24 @@ void print_current() {
 
 void loop() {
 
-  motor.loopFOC();
-  motor1.loopFOC();
+    if(player.isPlaying()) {
+      player.loop();
+    } else {
+  
+    motor.voltage_limit = 12;                   //When using other power supply voltages, modify the value of voltage_limit here
+    motor1.voltage_limit = 12;                  //Also modify the value of voltage_limit here
 
-  motor.move(target_velocity);
-  motor1.move(target_velocity);
+    motor.loopFOC();
+    motor1.loopFOC();
 
-  command.run();
+    motor.move(target_velocity);
+    motor1.move(target_velocity);
 
-  // print_current();
+    command.run();
 
-  // motor1.monitor();
-  // motor.monitor();
+    // print_current();
+
+    // motor1.monitor();
+    // motor.monitor();
+  }
 }
