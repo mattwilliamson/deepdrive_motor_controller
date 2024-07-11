@@ -1,0 +1,53 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// Pin definitions
+#define FRONT_HALL_PIN_A 18
+#define FRONT_HALL_PIN_B 19
+#define FRONT_HALL_PIN_C 15
+#define BACK_HALL_PIN_A 5
+#define BACK_HALL_PIN_B 23
+#define BACK_HALL_PIN_C 13
+
+#define FRONT_DRIVER_PIN_U 32
+#define FRONT_DRIVER_PIN_V 33
+#define FRONT_DRIVER_PIN_W 25
+#define FRONT_DRIVER_PIN_EN 22
+
+#define BACK_DRIVER_PIN_U 26
+#define BACK_DRIVER_PIN_V 27
+#define BACK_DRIVER_PIN_W 14
+#define BACK_DRIVER_PIN_EN 12
+
+#define FRONT_CURRENT_SENSE_PIN_U 39
+#define FRONT_CURRENT_SENSE_PIN_V 36
+#define BACK_CURRENT_SENSE_PIN_U 35
+#define BACK_CURRENT_SENSE_PIN_V 34
+
+// Motor settings
+#define MOTOR_FRONT_POLE_PAIRS 15
+#define MOTOR_BACK_POLE_PAIRS 15
+
+// Voltage settings
+#define VOLTAGE_SENSOR_ALIGN 3
+#define VOLTAGE_POWER_SUPPLY 12
+#define VOLTAGE_LIMIT 3.0
+#define CURRENT_LIMIT 0.25
+#define PWM_FREQUENCY 20000
+
+// PID settings
+#define PID_VELOCITY_P 0.2
+#define PID_VELOCITY_I 1.0
+#define PID_VELOCITY_D 0
+#define OUTPUT_RAMP 1000
+
+// LPF settings
+#define LPF_VELOCITY_TF 0.08
+
+// Speed limit
+#define VELOCITY_LIMIT 40
+
+// Other settings
+#define VELOCITY_INDEX_SEARCH 3
+
+#endif // CONFIG_H
