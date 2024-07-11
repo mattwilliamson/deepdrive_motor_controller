@@ -1,97 +1,89 @@
 #include "MotorController.h"
 
-HallSensor MotorController::sensorFront(FRONT_HALL_PIN_A, FRONT_HALL_PIN_B, FRONT_HALL_PIN_C, 15);
-HallSensor MotorController::sensorBack(BACK_HALL_PIN_A, BACK_HALL_PIN_B, BACK_HALL_PIN_C, 15);
-float MotorController::target_velocity = 0;
-
-MotorController::MotorController()
-    : currentSenseFront(0.01, (float)50.0, FRONT_CURRENT_SENSE_PIN_U, FRONT_CURRENT_SENSE_PIN_V),
-      currentSenseBack(0.01, (float)50.0, BACK_CURRENT_SENSE_PIN_U, BACK_CURRENT_SENSE_PIN_V),
-      motorFront(MOTOR_FRONT_POLE_PAIRS),
-      motorBack(MOTOR_BACK_POLE_PAIRS),
-      driverFront(FRONT_DRIVER_PIN_U, FRONT_DRIVER_PIN_V, FRONT_DRIVER_PIN_W, FRONT_DRIVER_PIN_EN),
-      driverBack(BACK_DRIVER_PIN_U, BACK_DRIVER_PIN_V, BACK_DRIVER_PIN_W, BACK_DRIVER_PIN_EN)
+MotorController::MotorController(int hallPinA, int hallPinB, int hallPinC, int polePairs,
+                                 int driverPinU, int driverPinV, int driverPinW, int driverPinEn,
+                                 int currentSensePinU, int currentSensePinV)
+    : sensor(hallPinA, hallPinB, hallPinC, polePairs),
+      currentSense(0.01, (float)50.0, currentSensePinU, currentSensePinV),
+      motor(polePairs),
+      driver(driverPinU, driverPinV, driverPinW, driverPinEn),
+      total_ticks(0),
+      target_velocity(0)
 {}
 
 void MotorController::init() {
     delay(10000);
 
-    currentSenseFront.gain_a *= -1;
-    currentSenseFront.gain_b *= -1;
-    currentSenseBack.gain_a *= -1;
-    currentSenseBack.gain_b *= -1;
+    initCurrentSense();
+    initHallSensor();
+    initMotorSettings();
+    initDriver();
 
-    currentSenseFront.init();
-    currentSenseBack.init();
+    motor.linkDriver(&driver);
+    motor.linkCurrentSense(&currentSense);
 
-    sensorFront.init();
-    sensorBack.init();
-
-    sensorFront.enableInterrupts(intFrontA, intFrontB, intFrontC);
-    sensorBack.enableInterrupts(intBackA, intBackB, intBackC);
-
-    initMotorSettings(motorFront);
-    initMotorSettings(motorBack);
-
-    driverFront.voltage_power_supply = VOLTAGE_POWER_SUPPLY;
-    driverFront.pwm_frequency = PWM_FREQUENCY;
-    driverFront.init();
-
-    driverBack.voltage_power_supply = VOLTAGE_POWER_SUPPLY;
-    driverBack.pwm_frequency = PWM_FREQUENCY;
-    driverBack.init();
-
-    motorFront.linkDriver(&driverFront);
-    motorBack.linkDriver(&driverBack);
-
-    motorFront.linkCurrentSense(&currentSenseFront);
-    motorBack.linkCurrentSense(&currentSenseBack);
-
-    currentSenseFront.linkDriver(&driverFront);
-    currentSenseBack.linkDriver(&driverBack);
+    currentSense.linkDriver(&driver);
 
     Serial.begin(115200);
 
-    motorFront.init();
-    motorFront.initFOC();
-
-    motorBack.init();
-    motorBack.initFOC();
+    motor.init();
+    motor.initFOC();
 }
 
 void MotorController::loop() {
-    motorFront.loopFOC();
-    motorBack.loopFOC();
-
-    motorFront.move(target_velocity);
-    motorBack.move(target_velocity);
+    motor.loopFOC();
+    motor.move(target_velocity);
 }
 
-void MotorController::intFrontA() {
-    sensorFront.handleA();
+void MotorController::setTargetVelocity(float velocity) {
+    target_velocity = velocity;
 }
 
-void MotorController::intFrontB() {
-    sensorFront.handleB();
+int64_t MotorController::getTotalTicks() {
+    return total_ticks;
 }
 
-void MotorController::intFrontC() {
-    sensorFront.handleC();
+void MotorController::intA() {
+    sensor.handleA();
+    total_ticks++;
 }
 
-void MotorController::intBackA() {
-    sensorBack.handleA();
+void MotorController::intB() {
+    sensor.handleB();
+    total_ticks++;
 }
 
-void MotorController::intBackB() {
-    sensorBack.handleB();
+void MotorController::intC() {
+    sensor.handleC();
+    total_ticks++;
 }
 
-void MotorController::intBackC() {
-    sensorBack.handleC();
+void MotorController::intA_static(void* arg) {
+    static_cast<MotorController*>(arg)->intA();
 }
 
-void MotorController::initMotorSettings(BLDCMotor& motor) {
+void MotorController::intB_static(void* arg) {
+    static_cast<MotorController*>(arg)->intB();
+}
+
+void MotorController::intC_static(void* arg) {
+    static_cast<MotorController*>(arg)->intC();
+}
+
+void MotorController::initHallSensor() {
+    sensor.init();
+    attachInterruptArg(digitalPinToInterrupt(sensor.pinA), intA_static, this, CHANGE);
+    attachInterruptArg(digitalPinToInterrupt(sensor.pinB), intB_static, this, CHANGE);
+    attachInterruptArg(digitalPinToInterrupt(sensor.pinC), intC_static, this, CHANGE);
+}
+
+void MotorController::initCurrentSense() {
+    currentSense.gain_a *= -1;
+    currentSense.gain_b *= -1;
+    currentSense.init();
+}
+
+void MotorController::initMotorSettings() {
     motor.voltage_sensor_align = VOLTAGE_SENSOR_ALIGN;
     motor.velocity_index_search = VELOCITY_INDEX_SEARCH;
 
@@ -108,4 +100,10 @@ void MotorController::initMotorSettings(BLDCMotor& motor) {
     motor.PID_velocity.output_ramp = OUTPUT_RAMP;
     motor.LPF_velocity.Tf = LPF_VELOCITY_TF;
     motor.velocity_limit = VELOCITY_LIMIT;
+}
+
+void MotorController::initDriver() {
+    driver.voltage_power_supply = VOLTAGE_POWER_SUPPLY;
+    driver.pwm_frequency = PWM_FREQUENCY;
+    driver.init();
 }

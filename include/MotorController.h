@@ -7,29 +7,34 @@
 
 class MotorController {
 public:
-    MotorController();
+    MotorController(int hallPinA, int hallPinB, int hallPinC, int polePairs,
+                    int driverPinU, int driverPinV, int driverPinW, int driverPinEn,
+                    int currentSensePinU, int currentSensePinV);
     void init();
     void loop();
+    void setTargetVelocity(float velocity);
+    int64_t getTotalTicks();
 
 private:
-    static HallSensor sensorFront;
-    static HallSensor sensorBack;
-    InlineCurrentSense currentSenseFront;
-    InlineCurrentSense currentSenseBack;
-    BLDCMotor motorFront;
-    BLDCMotor motorBack;
-    BLDCDriver3PWM driverFront;
-    BLDCDriver3PWM driverBack;
-    static float target_velocity;
+    HallSensor sensor;
+    InlineCurrentSense currentSense;
+    BLDCMotor motor;
+    BLDCDriver3PWM driver;
+    int64_t total_ticks;
+    float target_velocity;
 
-    static void intFrontA();
-    static void intFrontB();
-    static void intFrontC();
-    static void intBackA();
-    static void intBackB();
-    static void intBackC();
+    void intA();
+    void intB();
+    void intC();
 
-    void initMotorSettings(BLDCMotor& motor);
+    static void intA_static(void* arg);
+    static void intB_static(void* arg);
+    static void intC_static(void* arg);
+
+    void initHallSensor();
+    void initCurrentSense();
+    void initMotorSettings();
+    void initDriver();
 };
 
 #endif // MOTOR_CONTROLLER_H
