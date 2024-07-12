@@ -12,6 +12,22 @@
 
 
 ## Setup
+### Install PlatformIO
+
+https://docs.platformio.org/en/latest/core/installation/index.html
+
+```sh
+curl -fsSL -o get-platformio.py https://raw.githubusercontent.com/platformio/platformio-core-installer/master/get-platformio.py
+python3 get-platformio.py
+```
+
+### Clone
+```sh
+git clone git@github.com:mattwilliamson/deepdrive_motor_controller.git
+cd deepdrive_motor_controller
+git submodule init
+git submodule update
+```
 
 
 
