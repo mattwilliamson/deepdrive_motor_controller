@@ -25,18 +25,15 @@ python3 get-platformio.py
 ```sh
 git clone git@github.com:mattwilliamson/deepdrive_motor_controller.git
 cd deepdrive_motor_controller
-git submodule init
-git submodule update
+echo 'PATH="$HOME/.platformio/penv/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+pio run
 ```
 
+### Set EEPROM/Flash to store which motor it is
+Once the program is flashed, we will need to connect one motor controller at a time and then flash the eeprom (emulated in flash) with the value of which side it is on.
 
-
-### Set udev rule 
-
-So that we have the same file descriptor every time. Assumes Ubuntu. 
-
-
-Plug in MKS ESP32 FOC while powered up and get device details:
+Plug in MKS ESP32 FOC while powered up and get device details **one at a time**:
 
 ```sh
 sudo dmesg -w
@@ -66,7 +63,17 @@ lrwxrwxrwx 1 root root 13 Jul 12 09:36 platform-3610000.xhci-usb-0:2.1:1.0-port0
 lrwxrwxrwx 1 root root 13 Jul 12 09:36 platform-3610000.xhci-usb-0:2.4:1.0-port0 -> ../../ttyUSB1
 ```
 
+Flash it!
+```sh
+$ screen /dev/ttyUSB0
 
+Please enter 'left' or 'right' to set the side:
+left
+
+```
+
+
+### Connect to ROS2
 ```sh
 DISTRO="humble"
 LEFT="/dev/serial/by-path/platform-3610000.xhci-usb-0:2.1:1.0-port0"

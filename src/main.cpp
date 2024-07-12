@@ -9,6 +9,7 @@
 #include <std_msgs/msg/int64.h>
 
 #include "Config.h"
+#include "RobotSide.h"
 #include "MotorController.h"
 
 // Error handle loop
@@ -20,6 +21,8 @@ void error_loop() {
 
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}
+
+RobotSide& robotSide = RobotSide::getInstance();
 
 MotorController frontMotorController(FRONT_HALL_PIN_A, FRONT_HALL_PIN_B, FRONT_HALL_PIN_C, MOTOR_FRONT_POLE_PAIRS,
                                      FRONT_DRIVER_PIN_U, FRONT_DRIVER_PIN_V, FRONT_DRIVER_PIN_W, FRONT_DRIVER_PIN_EN,
@@ -69,6 +72,8 @@ void setup() {
     delay(10000);
 
     Serial.begin(115200);
+    while (!Serial); // Wait for serial port to connect (needed for some boards)
+
     set_microros_serial_transports(Serial);
     // delay(2000);
 
@@ -81,33 +86,33 @@ void setup() {
     RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
     rcl_node_t node;
-    RCCHECK(rclc_node_init_default(&node, "motor_left_node", "motor_left", &support));
+    RCCHECK(rclc_node_init_default(&node, robotSide.getNodeName(), robotSide.getNamespace(), &support));
 
     // Front motor ROS setup
     RCCHECK(rclc_publisher_init_default(
         &front_publisher,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64),
-        "front_motor_ticks_publisher"));
+        "front_ticks"));
 
     RCCHECK(rclc_subscription_init_default(
         &front_subscriber,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
-        "front_motor_velocity_subscriber"));
+        "front_motor_velocity"));
 
     // Back motor ROS setup
     RCCHECK(rclc_publisher_init_default(
         &back_publisher,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int64),
-        "back_motor_ticks_publisher"));
+        "back_ticks"));
 
     RCCHECK(rclc_subscription_init_default(
         &back_subscriber,
         &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
-        "back_motor_velocity_subscriber"));
+        "back_velocity"));
 
     // Timer setup
     const unsigned int timer_timeout = 1000; // 1 second
