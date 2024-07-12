@@ -65,9 +65,12 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
 
 
 void setup() {
+    // Give some time in case we are reflashing the board
+    delay(10000);
+
     Serial.begin(115200);
-    // set_microros_serial_transports(Serial);
-    delay(2000);
+    set_microros_serial_transports(Serial);
+    // delay(2000);
 
     frontMotorController.init();
     backMotorController.init();
@@ -78,7 +81,7 @@ void setup() {
     RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
     rcl_node_t node;
-    RCCHECK(rclc_node_init_default(&node, "motor_node", "", &support));
+    RCCHECK(rclc_node_init_default(&node, "motor_left_node", "motor_left", &support));
 
     // Front motor ROS setup
     RCCHECK(rclc_publisher_init_default(

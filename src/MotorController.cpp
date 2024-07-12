@@ -12,8 +12,6 @@ MotorController::MotorController(int hallPinA, int hallPinB, int hallPinC, int p
 {}
 
 void MotorController::init() {
-    delay(10000);
-
     initCurrentSense();
     initHallSensor();
     initMotorSettings();
@@ -23,8 +21,6 @@ void MotorController::init() {
     motor.linkCurrentSense(&currentSense);
 
     currentSense.linkDriver(&driver);
-
-    Serial.begin(115200);
 
     motor.init();
     motor.initFOC();
