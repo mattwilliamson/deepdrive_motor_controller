@@ -14,12 +14,13 @@ public:
     void loop();
     void setTargetVelocity(float velocity);
     int64_t getTotalTicks();
-
-private:
     HallSensor sensor;
     InlineCurrentSense currentSense;
     BLDCMotor motor;
     BLDCDriver3PWM driver;
+
+private:
+
     int64_t total_ticks;
     float target_velocity;
 

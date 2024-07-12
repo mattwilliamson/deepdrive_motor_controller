@@ -8,9 +8,9 @@ enum Side {
     RIGHT = 2
 };
 
-class RobotSide {
+class Settings {
 public:
-    static RobotSide& getInstance();
+    static Settings& getInstance();
     Side getSide();
     void setSide(Side side);
     const char* getNodeName();
@@ -18,12 +18,12 @@ public:
     const char* getNamespace();
 
 private:
-    RobotSide();
-    ~RobotSide();
-    RobotSide(const RobotSide&) = delete;
-    RobotSide& operator=(const RobotSide&) = delete;
+    Settings();
+    ~Settings();
+    Settings(const Settings&) = delete;
+    Settings& operator=(const Settings&) = delete;
 
-    void loadSide();
+    void loadSideOrWaitForSerial();
     void saveSide();
     void waitForSideInput();
 

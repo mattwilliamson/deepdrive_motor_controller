@@ -64,6 +64,7 @@ lrwxrwxrwx 1 root root 13 Jul 12 09:36 platform-3610000.xhci-usb-0:2.4:1.0-port0
 ```
 
 Flash it!
+(or just use VSCode PlatformIO serial monitor)
 ```sh
 $ screen /dev/ttyUSB0
 
@@ -72,17 +73,73 @@ left
 
 ```
 
-
 ### Connect to ROS2
+```sh
+
+# source /opt/ros/${ROS_DISTRO}/install/setup.sh && \
+# colcon build && \
+# source $UROS_WS/install/setup.sh && \
+# ros2 run micro_ros_setup create_agent_ws.sh && \
+# ros2 run micro_ros_setup build_agent.sh
+
+LEFT="/dev/ttyUSB0"
+RIGHT="/dev/ttyUSB1"
+
+ros2 run micro_ros_agent micro_ros_agent multiserial --devs "$LEFT $RIGHT" -v6
+# ros2 run micro_ros_agent micro_ros_agent serial --dev $LEFT -v6
+```
+
+### Connect to ROS2 (Docker)
 ```sh
 DISTRO="humble"
 LEFT="/dev/serial/by-path/platform-3610000.xhci-usb-0:2.1:1.0-port0"
-RIGHT="/dev/serial/by-path/platform-3610000.xhci-usb-0:2.4:1.0-port0"
+RIGHT="/dev/serial/by-path/platform-3610000.xhci-usb-0:2.3:1.0-port0"
+
 sudo docker run -it --rm -v /dev:/dev --privileged --net=host microros/micro-ros-agent:$DISTRO multiserial --devs "$LEFT $RIGHT" -v6
 
 # sudo docker run -it --rm -v /dev:/dev --privileged --net=host microros/micro-ros-agent:humble serial --dev /dev/serial/by-path/platform-3610000.xhci-usb-0:2.4:1.0-port0 -v6
 
 ```
+
+## Usage
+
+### Show/echo topics
+
+```sh
+$ ros2 node list
+/motor/right/motor_right_node
+
+$ ros2 topic list
+/motor/right/ticks/back
+/motor/right/ticks/front
+/motor/right/vel/cmd/back
+/motor/right/vel/cmd/front
+/parameter_events
+/rosout
+
+
+$ ros2 topic echo /motor/right/ticks/back
+data: 18
+---
+data: 18
+---
+data: 18
+---
+```
+
+### Set radians/s velocity
+
+```sh
+$ ros2 topic info /motor/right/vel/cmd/front
+Type: std_msgs/msg/Float32
+Publisher count: 0
+Subscription count: 1
+
+$ ros2 topic pub --once /motor/right/vel/cmd/front std_msgs/Float32 '{"data":1.0}'
+
+```
+
+
 
 
 

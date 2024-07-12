@@ -1,51 +1,51 @@
-#include "RobotSide.h"
+#include "Settings.h"
 #include <Arduino.h>
 
-RobotSide& RobotSide::getInstance() {
-    static RobotSide instance;
+Settings& Settings::getInstance() {
+    static Settings instance;
     return instance;
 }
 
-RobotSide::RobotSide() : sideLoaded(false) {
+Settings::Settings() : sideLoaded(false) {
     preferences.begin("robot_side", false);
-    loadSide();
+    loadSideOrWaitForSerial();
 }
 
-RobotSide::~RobotSide() {
+Settings::~Settings() {
     preferences.end();
 }
 
-Side RobotSide::getSide() {
+Side Settings::getSide() {
     if (!sideLoaded) {
-        loadSide();
+        loadSideOrWaitForSerial();
     }
     return side;
 }
 
-const char* RobotSide::getNodeName() {
+const char* Settings::getNodeName() {
     String nodeName = String("motor_") + getSideName() + "_node";
     char* result = new char[nodeName.length() + 1];
     strcpy(result, nodeName.c_str());
     return result;
 }
 
-const char* RobotSide::getSideName() {
+const char* Settings::getSideName() {
     return (getSide() == LEFT) ? "left" : "right";
 }
 
-const char* RobotSide::getNamespace() {
+const char* Settings::getNamespace() {
     String namespaceStr = String("motor/") + getSideName();
     char* result = new char[namespaceStr.length() + 1];
     strcpy(result, namespaceStr.c_str());
     return result;
 }
 
-void RobotSide::setSide(Side newSide) {
+void Settings::setSide(Side newSide) {
     side = newSide;
     saveSide();
 }
 
-void RobotSide::loadSide() {
+void Settings::loadSideOrWaitForSerial() {
     if (!sideLoaded) {
         uint storedValue = preferences.getUInt("side", 0);
         if (storedValue == LEFT || storedValue == RIGHT) {
@@ -57,12 +57,19 @@ void RobotSide::loadSide() {
     }
 }
 
-void RobotSide::saveSide() {
+void Settings::saveSide() {
     preferences.putUInt("side", static_cast<uint>(side));
 }
 
-void RobotSide::waitForSideInput() {
-    Serial.println("Please enter 'left' or 'right' to set the side:");
+/**
+ * Waits for user input from the Serial port to set the motor side.
+ * The user can enter 'left' or 'right' to set the side.
+ * If the input is invalid, the user will be prompted to enter again.
+ * If no input is received within 5 seconds, a message will be printed to prompt the user.
+ */
+void Settings::waitForSideInput() {
+    unsigned long lastPromptTime = millis();
+
     while (true) {
         if (Serial.available() > 0) {
             String input = Serial.readStringUntil('\n');
@@ -79,5 +86,13 @@ void RobotSide::waitForSideInput() {
                 Serial.println("Invalid input. Please enter 'left' or 'right':");
             }
         }
+
+        // Print the prompt every 5 seconds
+        if (millis() - lastPromptTime > 5000) {
+            Serial.println("No motor side set in EEPROM. Please enter 'left' or 'right' to set the side:");
+            lastPromptTime = millis();
+        }
     }
+
+    Serial.println("Configuration complete. Attempting to connect to micro-ros-agent in 10s...");
 }
