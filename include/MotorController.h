@@ -4,25 +4,31 @@
 #include <Arduino.h>
 #include <SimpleFOC.h>
 #include "Config.h"
+#include "RosoutLogger.hpp"
 
 class MotorController {
 public:
     MotorController(int hallPinA, int hallPinB, int hallPinC, int polePairs,
                     int driverPinU, int driverPinV, int driverPinW, int driverPinEn,
-                    int currentSensePinU, int currentSensePinV);
+                    int currentSensePinU, int currentSensePinV, RosoutLogger* logger);
+    // Copy assignment operator
+    MotorController& operator=(const MotorController& other) = default;
+
     void init();
     void loop();
     void setTargetVelocity(float velocity);
-    int64_t getTotalTicks();
+    float getVelocity();
+    float getCurrent();
+    double getAngle();
+
     HallSensor sensor;
     InlineCurrentSense currentSense;
     BLDCMotor motor;
     BLDCDriver3PWM driver;
 
 private:
-
-    int64_t total_ticks;
     float target_velocity;
+    RosoutLogger* logger;
 
     void intA();
     void intB();

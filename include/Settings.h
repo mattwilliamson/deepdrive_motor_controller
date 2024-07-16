@@ -13,7 +13,6 @@ public:
     static Settings& getInstance();
     Side getSide();
     void setSide(Side side);
-    const char* getNodeName();
     const char* getSideName();
     const char* getNamespace();
 

@@ -22,13 +22,6 @@ Side Settings::getSide() {
     return side;
 }
 
-const char* Settings::getNodeName() {
-    String nodeName = String("motor_") + getSideName() + "_node";
-    char* result = new char[nodeName.length() + 1];
-    strcpy(result, nodeName.c_str());
-    return result;
-}
-
 const char* Settings::getSideName() {
     return (getSide() == LEFT) ? "left" : "right";
 }

@@ -2,19 +2,26 @@
 
 MotorController::MotorController(int hallPinA, int hallPinB, int hallPinC, int polePairs,
                                  int driverPinU, int driverPinV, int driverPinW, int driverPinEn,
-                                 int currentSensePinU, int currentSensePinV)
+                                 int currentSensePinU, int currentSensePinV, RosoutLogger* logger)
     : sensor(hallPinA, hallPinB, hallPinC, polePairs),
       currentSense(0.01, (float)50.0, currentSensePinU, currentSensePinV),
       motor(polePairs),
       driver(driverPinU, driverPinV, driverPinW, driverPinEn),
-      total_ticks(0),
-      target_velocity(0)
+      target_velocity(0),
+      logger(logger)
 {}
+
 
 void MotorController::init() {
     // Current sense
-    currentSense.gain_a *= -1;
-    currentSense.gain_b *= -1;
+    currentSense.gain_a *= CURRENT_SENSE_GAIN_A;
+    currentSense.gain_b *= CURRENT_SENSE_GAIN_B;
+
+    #ifndef FOC_CHECK_ENABLE
+    // Detection disabled. Use specified values from config.
+    currentSense.skip_align = true;
+    #endif
+    
     currentSense.init();
 
     // Hall Sensors
@@ -34,12 +41,18 @@ void MotorController::init() {
     motor.PID_velocity.I = PID_VELOCITY_I;
     motor.PID_velocity.D = PID_VELOCITY_D;
 
-    motor.voltage_limit = VOLTAGE_LIMIT;
-    motor.current_limit = CURRENT_LIMIT;
+    motor.voltage_limit = VOLTAGE_LIMIT_INIT;
+    motor.current_limit = CURRENT_LIMIT_INIT;
 
     motor.PID_velocity.output_ramp = PID_VELOCITY_RAMP;
     motor.LPF_velocity.Tf = LPF_VELOCITY_TF;
     motor.velocity_limit = VELOCITY_LIMIT;
+
+    #ifndef FOC_CHECK_ENABLE
+    // Detection disabled. Use specified values from config.
+    motor.sensor_direction = SENSOR_DIRECTION;
+    motor.zero_electric_angle = 0;
+    #endif
 
     driver.voltage_power_supply = VOLTAGE_POWER_SUPPLY;
     driver.pwm_frequency = PWM_FREQUENCY;
@@ -51,37 +64,53 @@ void MotorController::init() {
     currentSense.linkDriver(&driver);
 
     // motor.useMonitoring(Serial);
+    if (logger != nullptr) {
+        motor.useMonitoring(*logger);
+    }
 
     motor.init();
     motor.initFOC();
+
+    motor.voltage_limit = VOLTAGE_LIMIT;
+    motor.current_limit = CURRENT_LIMIT;
 }
 
 void MotorController::loop() {
     motor.loopFOC();
     motor.move(target_velocity);
+    sensor.update();
 }
 
 void MotorController::setTargetVelocity(float velocity) {
     target_velocity = velocity;
 }
 
-int64_t MotorController::getTotalTicks() {
-    return total_ticks;
+float MotorController::getVelocity() {
+    return sensor.getVelocity();
 }
+
+float MotorController::getCurrent() {
+    return motor.current_sp;
+}
+
+double MotorController::getAngle() {
+    return sensor.getPreciseAngle();
+}
+
 
 void MotorController::intA() {
     sensor.handleA();
-    total_ticks++;
+    // total_ticks++;
 }
 
 void MotorController::intB() {
     sensor.handleB();
-    total_ticks++;
+    // total_ticks++;
 }
 
 void MotorController::intC() {
     sensor.handleC();
-    total_ticks++;
+    // total_ticks++;
 }
 
 void MotorController::intA_static(void* arg) {

@@ -42,12 +42,14 @@
 // Voltage settings
 #define VOLTAGE_SENSOR_ALIGN 3 /**< Voltage sensor alignment value. */
 #define VOLTAGE_POWER_SUPPLY 12 /**< Power supply voltage value. */
-#define VOLTAGE_LIMIT 3.0 /**< Voltage limit value. */
-#define CURRENT_LIMIT 0.25 /**< Current limit value. */
+#define VOLTAGE_LIMIT_INIT VOLTAGE_SENSOR_ALIGN /**< Voltage limit value. */
+#define CURRENT_LIMIT_INIT 0.5 /**< Current limit value. */
+#define VOLTAGE_LIMIT 12.0 /**< Voltage limit value. */
+#define CURRENT_LIMIT 0.5 /**< Current limit value. */
 #define PWM_FREQUENCY 20000 /**< PWM frequency value. */
 
 // PID settings
-#define PID_VELOCITY_P 0.2 /**< Proportional gain for velocity PID controller. */
+#define PID_VELOCITY_P 0.25 /**< Proportional gain for velocity PID controller. */
 #define PID_VELOCITY_I 1.0 /**< Integral gain for velocity PID controller. */
 #define PID_VELOCITY_D 0 /**< Derivative gain for velocity PID controller. */
 #define PID_VELOCITY_RAMP 1000 /**< Output ramp value for velocity PID controller. */
@@ -56,9 +58,35 @@
 #define LPF_VELOCITY_TF 0.08 /**< Time constant for velocity low-pass filter. */
 
 // Speed limit
-#define VELOCITY_LIMIT 40 /**< Maximum velocity limit. */
+#define VELOCITY_LIMIT 20 /**< Maximum velocity limit. */
 
 // Other settings
 #define VELOCITY_INDEX_SEARCH 3 /**< Index search value for velocity control. */
+
+#define PUBLISH_ODOM_HZ 10 /**< Frequency for publishing odometry data. */
+
+#define MOTOR_LOOP_PERIOD 1 /**< Period for motor control loop. in microseconds */
+#define MICRO_ROS_LOOP_PERIOD 10 /**< Period for micro-ROS control loop. in microseconds */
+
+// #define SWAP_LEFT_SIDE_MOTORS /**< Flag to swap left side front/back motors. */
+#define SWAP_RIGHT_SIDE_MOTORS /**< Flag to swap right side front/back motors. */
+
+// #define INVERT_FRONT_MOTOR /**< Flag to invert left motor direction. */
+// #define INVERT_BACK_MOTOR /**< Flag to invert right motor direction. */
+
+// Ping the agent at startup or reboot
+#define UROS_TIMEOUT_STARTUP 1000 /**< Timeout value for UROS communication (ms). */
+#define UROS_ATTEMPTS_STARTUP 10 /**< Number of attempts for UROS communication. */
+
+// Ping the agent periodically
+#define UROS_TIMEOUT_PERIODIC 10 /**< Timeout value for UROS communication (ms). */
+#define UROS_ATTEMPTS_PERIODIC 3 /**< Number of attempts for UROS communication. */
+
+#define FOC_CHECK_ENABLE /**< Flag to enable FOC check., which checks pole pairs, direction and electrical angle. Will log to /rosout */
+// TODO: Make this configurable for each different motor
+#define SENSOR_DIRECTION Direction::CCW /**< Direction of the front sensor. */
+
+#define CURRENT_SENSE_GAIN_A -1 /**< Gain value for current sense A. */
+#define CURRENT_SENSE_GAIN_B -1 /**< Gain value for current sense B. */
 
 #endif // CONFIG_H

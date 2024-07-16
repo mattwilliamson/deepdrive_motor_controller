@@ -1,15 +1,22 @@
 # DeepDrive Motor Controller Firmware
 
+## TODO
+
+- [ ] restart esp32 if it can't connect
+- [ ] Beeps/music
+- [ ] Use multicore FreeRTOS to run motor loop on one core and micro ros loop on another
+- [ ] Timeout on cmd_vel - stop the motors
+
 ## Hardware
+
 - [Jetson Orin Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit)
 - [Makerbase ESP32 Dual Brushless Micro FOC V1.0](https://makerbase3d.com/product/esp32-foc/)
-
+- Motors extracted from a hoverboard
 
 ## Software
 
 - [Micro ROS](https://micro.ros.org/) - ROS2 Communication
 - [SimpleFOC](https://docs.simplefoc.com/library_platformio) - Brushless motor controller library
-
 
 ## Setup
 ### Install PlatformIO
@@ -55,18 +62,29 @@ sudo dmesg -w
 [ 1182.089568] usb 1-2.4: ch341-uart converter now attached to ttyUSB1
 ```
 
-Get device by port number
+### Set a symlink alias
+
+To distinguish between other devices, like GPS
+
 ```sh
-matt@deepdrive:~$ ls -l /dev/serial/by-path/
-total 0
-lrwxrwxrwx 1 root root 13 Jul 12 09:36 platform-3610000.xhci-usb-0:2.1:1.0-port0 -> ../../ttyUSB0
-lrwxrwxrwx 1 root root 13 Jul 12 09:36 platform-3610000.xhci-usb-0:2.4:1.0-port0 -> ../../ttyUSB1
+cat << EOF | sudo tee /etc/udev/rules.d/99-motor_controller.rules
+KERNEL=="ttyUSB[0-9]*", SUBSYSTEMS=="usb", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE:="0777", SYMLINK+="ttyMotor%n"
+EOF
+
+# Reload the rules
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+Check it
+```sh
+matt@deepdrive:~$ ls /dev/ttyMotor*
+/dev/ttyMotor1  /dev/ttyMotor2
 ```
 
 Flash it!
 (or just use VSCode PlatformIO serial monitor)
 ```sh
-$ screen /dev/ttyUSB0
+$ screen /dev/ttyMotor1 115200
 
 Please enter 'left' or 'right' to set the side:
 left
@@ -74,16 +92,16 @@ left
 ```
 
 ### Connect to ROS2
-```sh
 
+```sh
 # source /opt/ros/${ROS_DISTRO}/install/setup.sh && \
 # colcon build && \
 # source $UROS_WS/install/setup.sh && \
 # ros2 run micro_ros_setup create_agent_ws.sh && \
 # ros2 run micro_ros_setup build_agent.sh
 
-LEFT="/dev/ttyUSB0"
-RIGHT="/dev/ttyUSB1"
+LEFT="/dev/ttyMotor1"
+RIGHT="/dev/ttyMotor2"
 
 ros2 run micro_ros_agent micro_ros_agent multiserial --devs "$LEFT $RIGHT" -v6
 # ros2 run micro_ros_agent micro_ros_agent serial --dev $LEFT -v6
@@ -110,15 +128,18 @@ $ ros2 node list
 /motor/right/motor_right_node
 
 $ ros2 topic list
-/motor/right/ticks/back
-/motor/right/ticks/front
-/motor/right/vel/cmd/back
-/motor/right/vel/cmd/front
+/motor/left/back/angle
+/motor/left/back/vel/cmd
+/motor/left/front/angle
+/motor/left/front/vel/cmd
+/motor/right/back/angle
+/motor/right/back/vel/cmd
+/motor/right/front/angle
+/motor/right/front/vel/cmd
 /parameter_events
 /rosout
 
-
-$ ros2 topic echo /motor/right/ticks/back
+$ ros2 topic echo /motor/right/front/angle
 data: 18
 ---
 data: 18
@@ -130,12 +151,12 @@ data: 18
 ### Set radians/s velocity
 
 ```sh
-$ ros2 topic info /motor/right/vel/cmd/front
+$ ros2 topic info /motor/right/front/vel/cmd
 Type: std_msgs/msg/Float32
 Publisher count: 0
 Subscription count: 1
 
-$ ros2 topic pub --once /motor/right/vel/cmd/front std_msgs/Float32 '{"data":1.0}'
+$ ros2 topic pub --once /motor/right/front/vel/cmd std_msgs/Float32 '{"data":1.0}'
 
 ```
 
