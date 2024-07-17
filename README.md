@@ -19,6 +19,9 @@
 - Battery - maybe [3S 11.1v or 4s 14.8v LiPo battery](https://a.aliexpress.com/_mqAFuBK)
 - [XT60 connectors](https://a.aliexpress.com/_mr8JWhq)
 - [18AWG Silicone Wire](https://a.aliexpress.com/_mOMhfnI)
+- [1.5k resistors](https://a.aliexpress.com/_mOX21Gg) for pulling up hall encoder lines
+- [6Pin JST 2.54mm PH Connectors](https://a.aliexpress.com/_mOCTF7m) for hall encoders
+- [Heat shrink tubing](https://a.aliexpress.com/_mti7qlm)
 
 ## Software
 
@@ -176,6 +179,14 @@ The power button enables power theough the MOSFET for the whole system. The togg
 I did have to solder on a resistor for the power button LED.
 
 For my throw switch, I had to mod it because the buck converter switch logic is inverterted. It is poowered on when the signal is pulled low. I just took the covere off and reversed it. I could have also just soldered a transistor here, which might be preferrable.
+
+todo:
+- switches
+- buck converter
+- hall encoder
+- pullups
+- esp32
+- motors
 
 
 ## Based on:
