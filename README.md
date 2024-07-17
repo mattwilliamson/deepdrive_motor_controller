@@ -15,7 +15,7 @@
 - [Buck Converter](https://a.aliexpress.com/_m0FF8oU)
 - [MOSFET](https://a.aliexpress.com/_mqzjWYk)
 - [Power Button](https://a.aliexpress.com/_m0NGJUo)
-- [Toggle Switch](https://a.aliexpress.com/_mMP37Ac
+- [Toggle Switch](https://a.aliexpress.com/_mMP37Ac)
 - Battery - maybe [3S 11.1v or 4s 14.8v LiPo battery](https://a.aliexpress.com/_mqAFuBK)
 - [XT60 connectors](https://a.aliexpress.com/_mr8JWhq)
 
