@@ -18,6 +18,7 @@
 - [Toggle Switch](https://a.aliexpress.com/_mMP37Ac)
 - Battery - maybe [3S 11.1v or 4s 14.8v LiPo battery](https://a.aliexpress.com/_mqAFuBK)
 - [XT60 connectors](https://a.aliexpress.com/_mr8JWhq)
+- [18AWG Silicone Wire](https://a.aliexpress.com/_mOMhfnI)
 
 ## Software
 
