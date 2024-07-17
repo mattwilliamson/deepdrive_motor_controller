@@ -12,6 +12,12 @@
 - [Jetson Orin Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit)
 - [Makerbase ESP32 Dual Brushless Micro FOC V1.0](https://makerbase3d.com/product/esp32-foc/)
 - Motors extracted from a hoverboard
+- [Buck Converter](https://a.aliexpress.com/_m0FF8oU)
+- [MOSFET](https://a.aliexpress.com/_mqzjWYk)
+- [Power Button](https://a.aliexpress.com/_m0NGJUo)
+- [Toggle Switch](https://a.aliexpress.com/_mMP37Ac
+- Battery - maybe [3S 11.1v or 4s 14.8v LiPo battery](https://a.aliexpress.com/_mqAFuBK)
+- [XT60 connectors](https://a.aliexpress.com/_mr8JWhq)
 
 ## Software
 
@@ -160,8 +166,15 @@ $ ros2 topic pub --once /motor/right/front/vel/cmd std_msgs/Float32 '{"data":1.0
 
 ```
 
+## Wiring
 
+When connected directly to a 3s LiPo battery, I burned out 3 ESP32 modules before adding the buck converter. The buck converter has current limiting, eh8ch has also helped the USB bus from browning out.
 
+The power button enables power theough the MOSFET for the whole system. The toggle switch turns on the power for the buck converter. This allows killing the motors if they go crazy or carch fire like mine did before I added the buck converter.
+
+I did have to solder on a resistor for the power button LED.
+
+For my throw switch, I had to mod it because the buck converter switch logic is inverterted. It is poowered on when the signal is pulled low. I just took the covere off and reversed it. I could have also just soldered a transistor here, which might be preferrable.
 
 
 ## Based on:
