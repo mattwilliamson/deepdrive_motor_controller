@@ -11,7 +11,7 @@
 
 - [Jetson Orin Nano](https://developer.nvidia.com/embedded/learn/get-started-jetson-orin-nano-devkit)
 - [Makerbase ESP32 Dual Brushless Micro FOC V1.0](https://makerbase3d.com/product/esp32-foc/)
-- Motors extracted from a hoverboard
+- Hoverboard motors - got mine from Marketplace or you can do [something like this](https://a.aliexpress.com/_m0xGSQg)
 - [Buck Converter](https://a.aliexpress.com/_m0FF8oU)
 - [MOSFET](https://a.aliexpress.com/_mqzjWYk)
 - [Power Button](https://a.aliexpress.com/_m0NGJUo)
