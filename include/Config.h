@@ -12,6 +12,11 @@
 #define BOARD_DELAY 10000 /**< Delay in microseconds for board initialization. */
 #define SERIAL_BAUD_RATE 115200 /**< Baud rate for serial communication. */
 
+// Pub/sub timeouts
+#define MESSAGE_RECEIVE_TIMEOUT 1000 /**< Start pinging the microros-agent if we haven't had a message for a while */
+#define AGENT_PING_TIMEOUT 100 /**< Reboot the board if we can't reach the agent */
+#define AGENT_PING_ATTEMPTS_REBOOT 200 /**< Reboot the board if we can't reach the agent for 200 * 100 milliseconds (20s) */
+
 // Pin definitions
 #define FRONT_HALL_PIN_A 18 /**< Pin number for front hall sensor A. */
 #define FRONT_HALL_PIN_B 19 /**< Pin number for front hall sensor B. */
@@ -47,6 +52,10 @@
 #define VOLTAGE_LIMIT 12.0 /**< Voltage limit value. */
 #define CURRENT_LIMIT 0.5 /**< Current limit value. */
 #define PWM_FREQUENCY 20000 /**< PWM frequency value. */
+
+#define VOLTAGE_LIMIT_TONE 1.5 /**< Voltage limit value for tone player. */
+#define TONE_VOLUME 50 /**< Volume value for tone player. */
+#define TONE_NOTE_OFFSET -12 /**< Note offset value for tone player (-12 is down an octave). */
 
 // PID settings
 #define PID_VELOCITY_P 0.25 /**< Proportional gain for velocity PID controller. */

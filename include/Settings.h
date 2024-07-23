@@ -15,6 +15,7 @@ public:
     void setSide(Side side);
     const char* getSideName();
     const char* getNamespace();
+    // const char* Settings::getNodeName();
 
 private:
     Settings();

@@ -26,6 +26,13 @@ const char* Settings::getSideName() {
     return (getSide() == LEFT) ? "left" : "right";
 }
 
+// const char* Settings::getNodeName() {
+//     String namespaceStr = String("deepdrive_motor_controller_node_") + getSideName();
+//     char* result = new char[namespaceStr.length() + 1];
+//     strcpy(result, namespaceStr.c_str());
+//     return result;
+// }
+
 const char* Settings::getNamespace() {
     String namespaceStr = String("motor/") + getSideName();
     char* result = new char[namespaceStr.length() + 1];

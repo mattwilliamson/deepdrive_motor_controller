@@ -1,8 +1,14 @@
 #ifndef MOTOR_CONTROLLER_H
 #define MOTOR_CONTROLLER_H
 
+
 #include <Arduino.h>
 #include <SimpleFOC.h>
+
+#include <TonePlayer.h>
+#include <BLDCSpeaker.h>
+#include <BLDCMotor.h>
+
 #include "Config.h"
 #include "RosoutLogger.hpp"
 
@@ -14,17 +20,23 @@ public:
     // Copy assignment operator
     MotorController& operator=(const MotorController& other) = default;
 
-    void init();
+    void initialize();
     void loop();
     void setTargetVelocity(float velocity);
     float getVelocity();
     float getCurrent();
     double getAngle();
-
+    void playStartup();
+    void playError();
+    void playSuccess();
+    
     HallSensor sensor;
     InlineCurrentSense currentSense;
     BLDCMotor motor;
     BLDCDriver3PWM driver;
+
+    BLDCSpeaker speaker;
+    TonePlayer player;
 
 private:
     float target_velocity;

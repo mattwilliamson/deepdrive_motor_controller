@@ -5,7 +5,8 @@
 - [ ] restart esp32 if it can't connect
 - [ ] Beeps/music
 - [ ] Use multicore FreeRTOS to run motor loop on one core and micro ros loop on another
-- [ ] Timeout on cmd_vel - stop the motors
+- [ ] Calibrate both motors at the same time on 2 cores
+- [x] Timeout on cmd_vel - stop the motors, reboot after this and trying pings for a while
 
 ## Hardware
 
