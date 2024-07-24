@@ -74,7 +74,7 @@
 
 #define PUBLISH_ODOM_HZ 10 /**< Frequency for publishing odometry data. */
 
-#define MOTOR_LOOP_PERIOD 1 /**< Period for motor control loop. in microseconds */
+#define MOTOR_LOOP_PERIOD 10 /**< Period for motor control loop. in microseconds */
 #define MICRO_ROS_LOOP_PERIOD 10 /**< Period for micro-ROS control loop. in microseconds */
 
 // #define SWAP_LEFT_SIDE_MOTORS /**< Flag to swap left side front/back motors. */

@@ -1,11 +1,11 @@
 #include "MotorController.h"
 #include <RTTTL.h>
 
-const char rtttl[] PROGMEM = "HarryPot:d=16,o=5,b=125:2p,8p,8b,8e.6,g6,8f#6,4e6,8b6,4a.6,4f#.6,8e.6,g6,8f#6,4d6,8f6,2b,8p,8b,8e.6,g6,8f#6,4e6,8b6,4d7,8c#7,4c7,8g#6,8c.7,b6,8a#6,4f#6,8g6,2e6,8p,8g6,4b6,8g6,4b6,8g6,4c7,8b6,4a#6,8f#6,8g.6,b6,8a#6,4a#,8b,2b6,8p";
+// const char rtttl[] PROGMEM = "HarryPot:d=16,o=5,b=125:2p,8p,8b,8e.6,g6,8f#6,4e6,8b6,4a.6,4f#.6,8e.6,g6,8f#6,4d6,8f6,2b,8p,8b,8e.6,g6,8f#6,4e6,8b6,4d7,8c#7,4c7,8g#6,8c.7,b6,8a#6,4f#6,8g6,2e6,8p,8g6,4b6,8g6,4b6,8g6,4c7,8b6,4a#6,8f#6,8g.6,b6,8a#6,4a#,8b,2b6,8p";
 
-Song* song_startup = parseRTTL(rtttl);
-Song* song_error = parseRTTL("jamesbond:d=4,o=6,b=112:16c.5,32d.5,32d.5,16d.5,8d.5,16c.5,16c.5");
-Song* song_success = parseRTTL("jamesbond:d=4,o=6,b=112:16c.5,32d.5,32d.5,16d.5,8d.5,16c.5,16c.5");
+// Song* song_startup = parseRTTL(rtttl);
+// Song* song_error = parseRTTL("jamesbond:d=4,o=6,b=112:16c.5,32d.5,32d.5,16d.5,8d.5,16c.5,16c.5");
+// Song* song_success = parseRTTL("jamesbond:d=4,o=6,b=112:16c.5,32d.5,32d.5,16d.5,8d.5,16c.5,16c.5");
 
 MotorController::MotorController(int hallPinA, int hallPinB, int hallPinC,
                                  int polePairs, int driverPinU, int driverPinV,
@@ -21,7 +21,7 @@ MotorController::MotorController(int hallPinA, int hallPinB, int hallPinC,
       speaker(&motor, VOLTAGE_LIMIT_TONE, TONE_VOLUME, TONE_NOTE_OFFSET) {}
 
 void MotorController::playStartup() {
-  player.play(song_startup);
+  // player.play(song_startup);
   // while (player.isPlaying()) {
     // player.loop();
     // vTaskDelay(1);
@@ -29,11 +29,11 @@ void MotorController::playStartup() {
 }
 
 void MotorController::playError() {
-  player.play(song_error);
+  // player.play(song_error);
 }
 
 void MotorController::playSuccess() {
-  player.play(song_success);
+  // player.play(song_success);
 }
 
 void MotorController::initialize() {
@@ -99,37 +99,37 @@ void MotorController::initialize() {
   motor.initFOC();
 
   // Setup tone-lib ringtone player
-  player.attachSpeaker(&speaker);
-  Serial.println("player.play");
-  playStartup();
+  // player.attachSpeaker(&speaker);
+  // Serial.println("player.play");
+  // playStartup();
 }
 
 
 void MotorController::loop() {
   if (player.isPlaying()) {
-    Serial.println("player.isPlaying()");
+    // Serial.println("player.isPlaying()");
     // Make sure the motor is stopped
-    if (sensor.getVelocity() == 0.0) {
-      Serial.println("playing tone");
+    // if (sensor.getVelocity() == 0.0) {
+    //   Serial.println("playing tone");
 
-      // Set to open loop control for speaker
-      motor.controller = MotionControlType::velocity_openloop;
-      motor.voltage_limit = VOLTAGE_LIMIT_TONE;
+    //   // Set to open loop control for speaker
+    //   motor.controller = MotionControlType::velocity_openloop;
+    //   motor.voltage_limit = VOLTAGE_LIMIT_TONE;
 
-      player.loop();
-    } else {
-      Serial.println("stopping motor");
-      target_velocity = 0;
-      motor.loopFOC();
-      motor.move(0.0);
-      sensor.update(); 
-    }
+    //   player.loop();
+    // } else {
+    //   Serial.println("stopping motor");
+    //   target_velocity = 0;
+    //   motor.loopFOC();
+    //   motor.move(0.0);
+    //   sensor.update(); 
+    // }
   } else {
     // Serial.println("!player.isPlaying()");
 
     // TODO: Make some state machine or something to do this less frequently
-    motor.controller = MotionControlType::velocity;
-    motor.voltage_limit = VOLTAGE_LIMIT;
+    // motor.controller = MotionControlType::velocity;
+    // motor.voltage_limit = VOLTAGE_LIMIT;
 
     motor.loopFOC();
     motor.move(target_velocity);
