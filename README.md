@@ -30,6 +30,13 @@
 - [SimpleFOC](https://docs.simplefoc.com/library_platformio) - Brushless motor controller library
 
 ## Setup
+
+### Add user to dialout group
+
+```sh
+sudo usermod -a -G dialout $(whoami)
+```
+
 ### Install PlatformIO
 
 https://docs.platformio.org/en/latest/core/installation/index.html
@@ -48,10 +55,46 @@ source ~/.bashrc
 pio run
 ```
 
+### Missing drivers
+
+If your device doesn't show up in `sudo dmesg` then you might need to re-install drivers:
+
+```sh
+cd /opt
+sudo git clone https://github.com/juliagoda/CH341SER
+cd CH341SER
+sudo make clean 
+
+sudo make
+
+# If using secure boot
+# https://ubuntu.com/blog/how-to-sign-things-for-secure-boot
+#kmodsign sha512 /var/lib/shim-signed/mok/MOK.priv /var/lib/shim-signed/mok/MOK.der ./ch34x.ko
+
+sudo make load
+lsmod | grep ch34*
+
+sudo make install
+```
+
+*unplug and plug it back in again*
+
+```sh
+$ sudo dmesg -w
+[ 5324.176691] usbserial: USB Serial support registered for ch34x
+[ 5324.176734] ch34x 1-1.3:1.0: ch34x converter detected
+[ 5324.181802] usb 1-1.3: ch34x converter now attached to ttyUSB0
+```
+
 ### Set EEPROM/Flash to store which motor it is
 Once the program is flashed, we will need to connect one motor controller at a time and then flash the eeprom (emulated in flash) with the value of which side it is on.
 
 Plug in MKS ESP32 FOC while powered up and get device details **one at a time**:
+
+Remove braile support so ttyUSB works with CH431 Serial device:
+```sh
+sudo apt remove brltty 
+```
 
 ```sh
 sudo dmesg -w
