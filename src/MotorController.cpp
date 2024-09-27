@@ -106,7 +106,7 @@ void MotorController::initialize() {
 
 
 void MotorController::loop() {
-  if (player.isPlaying()) {
+  // if (player.isPlaying()) {
     // Serial.println("player.isPlaying()");
     // Make sure the motor is stopped
     // if (sensor.getVelocity() == 0.0) {
@@ -124,7 +124,7 @@ void MotorController::loop() {
     //   motor.move(0.0);
     //   sensor.update(); 
     // }
-  } else {
+  // } else {
     // Serial.println("!player.isPlaying()");
 
     // TODO: Make some state machine or something to do this less frequently
@@ -132,9 +132,11 @@ void MotorController::loop() {
     // motor.voltage_limit = VOLTAGE_LIMIT;
 
     motor.loopFOC();
+    // Free up a cycle so the watchdog timer will be cleared
+    vTaskDelay(1);
     motor.move(target_velocity);
     sensor.update();
-  }
+  // }
 }
 
 void MotorController::setTargetVelocity(float velocity) {

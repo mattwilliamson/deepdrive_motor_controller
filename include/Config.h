@@ -13,9 +13,9 @@
 #define SERIAL_BAUD_RATE 115200 /**< Baud rate for serial communication. */
 
 // Pub/sub timeouts
-#define MESSAGE_RECEIVE_TIMEOUT 1000 /**< Start pinging the microros-agent if we haven't had a message for a while */
+#define MESSAGE_RECEIVE_TIMEOUT 5000 /**< Start pinging the microros-agent if we haven't had a message for a while */
 #define AGENT_PING_TIMEOUT 100 /**< Reboot the board if we can't reach the agent */
-#define AGENT_PING_ATTEMPTS_REBOOT 200 /**< Reboot the board if we can't reach the agent for 200 * 100 milliseconds (20s) */
+#define AGENT_PING_ATTEMPTS_REBOOT 20 /**< Reboot the board if we can't reach the agent this many ping attempts */
 
 // Pin definitions
 #define FRONT_HALL_PIN_A 18 /**< Pin number for front hall sensor A. */

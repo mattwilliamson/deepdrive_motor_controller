@@ -34,9 +34,23 @@ const char* Settings::getSideName() {
 // }
 
 const char* Settings::getNamespace() {
-    String namespaceStr = String("motor/") + getSideName();
+    String namespaceStr = String("deepdrive_motor_") + getSideName();
     char* result = new char[namespaceStr.length() + 1];
     strcpy(result, namespaceStr.c_str());
+    return result;
+}
+
+const char* Settings::getCmdVelTopic(const char* position) {
+    String topicStr = String("deepdrive_motor_wheel_") + position + "_" + getSideName() + "_joint/cmd/vel";
+    char* result = new char[topicStr.length() + 1];
+    strcpy(result, topicStr.c_str());
+    return result;
+}
+
+const char* Settings::getAngleTopic(const char* position) {
+    String topicStr = String("deepdrive_motor_wheel_") + position + "_" + getSideName() + "_joint/angle";
+    char* result = new char[topicStr.length() + 1];
+    strcpy(result, topicStr.c_str());
     return result;
 }
 

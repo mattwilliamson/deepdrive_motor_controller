@@ -132,13 +132,14 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 Check it
 ```sh
 matt@deepdrive:~$ ls /dev/ttyMotor*
-/dev/ttyMotor1  /dev/ttyMotor2
+/dev/ttyMotor0  /dev/ttyMotor1
 ```
 
 Flash it!
 (or just use VSCode PlatformIO serial monitor)
 ```sh
-$ screen /dev/ttyMotor1 115200
+$ sudo apt-get install screen
+$ screen /dev/ttyMotor0 115200
 
 Please enter 'left' or 'right' to set the side:
 left
@@ -148,17 +149,14 @@ left
 ### Connect to ROS2
 
 ```sh
-# source /opt/ros/${ROS_DISTRO}/install/setup.sh && \
-# colcon build && \
 # source $UROS_WS/install/setup.sh && \
 # ros2 run micro_ros_setup create_agent_ws.sh && \
 # ros2 run micro_ros_setup build_agent.sh
 
-LEFT="/dev/ttyMotor1"
-RIGHT="/dev/ttyMotor2"
-
-ros2 run micro_ros_agent micro_ros_agent multiserial --devs "$LEFT $RIGHT" -v6
-# ros2 run micro_ros_agent micro_ros_agent serial --dev $LEFT -v6
+$ cd ~/src/deepdrive
+$ make dockershell
+$ MOTORS=`ls /dev/ttyMotor*`
+$ ros2 run micro_ros_agent micro_ros_agent multiserial --devs "$MOTORS" -v6
 ```
 
 ### Connect to ROS2 (Docker)
@@ -206,11 +204,11 @@ data: 18
 
 ```sh
 $ ros2 topic info /motor/right/front/vel/cmd
-Type: std_msgs/msg/Float32
+Type: std_msgs/msg/Float64
 Publisher count: 0
 Subscription count: 1
 
-$ ros2 topic pub --once /motor/right/front/vel/cmd std_msgs/Float32 '{"data":1.0}'
+$ ros2 topic pub --once /motor/right/front/vel/cmd std_msgs/Float64 '{"data":1.0}'
 
 ```
 

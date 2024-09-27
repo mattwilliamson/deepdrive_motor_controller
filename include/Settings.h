@@ -16,6 +16,8 @@ public:
     const char* getSideName();
     const char* getNamespace();
     // const char* Settings::getNodeName();
+    const char* getCmdVelTopic(const char* position);
+    const char* getAngleTopic(const char* position);
 
 private:
     Settings();

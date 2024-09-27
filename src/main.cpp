@@ -4,7 +4,6 @@
 #include <rcl/rcl.h>
 #include <rclc/executor.h>
 #include <rclc/rclc.h>
-#include <std_msgs/msg/float32.h>
 #include <std_msgs/msg/float64.h>
 
 #include "Config.h"
@@ -20,19 +19,19 @@ void error_loop() {
   }
 }
 
-#define RCCHECK(fn)                                                            \
-  {                                                                            \
-    rcl_ret_t temp_rc = fn;                                                    \
-    if ((temp_rc != RCL_RET_OK)) {                                             \
-      Serial.println("error code: " + String(temp_rc));                        \
-      error_loop();                                                            \
-    }                                                                          \
+#define RCCHECK(fn)                                     \
+  {                                                     \
+    rcl_ret_t temp_rc = fn;                             \
+    if ((temp_rc != RCL_RET_OK)) {                      \
+      Serial.println("error code: " + String(temp_rc)); \
+      error_loop();                                     \
+    }                                                   \
   }
-#define RCSOFTCHECK(fn)                                                        \
-  {                                                                            \
-    rcl_ret_t temp_rc = fn;                                                    \
-    if ((temp_rc != RCL_RET_OK)) {                                             \
-    }                                                                          \
+#define RCSOFTCHECK(fn)            \
+  {                                \
+    rcl_ret_t temp_rc = fn;        \
+    if ((temp_rc != RCL_RET_OK)) { \
+    }                              \
   }
 // #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc !=
 // RCL_RET_OK)){printf("Failed status on line %d: %d.
@@ -50,12 +49,12 @@ RosoutLogger *logger;
 rcl_publisher_t front_publisher;
 rcl_subscription_t front_subscriber;
 std_msgs__msg__Float64 front_pub_msg;
-std_msgs__msg__Float32 front_sub_msg;
+std_msgs__msg__Float64 front_sub_msg;
 
 rcl_publisher_t back_publisher;
 rcl_subscription_t back_subscriber;
 std_msgs__msg__Float64 back_pub_msg;
-std_msgs__msg__Float32 back_sub_msg;
+std_msgs__msg__Float64 back_sub_msg;
 
 rcl_timer_t timer_odom;
 
@@ -68,13 +67,13 @@ uint32_t ping_failures = 0;
 
 void front_subscription_callback(const void *msgin) {
   last_message_time = millis();
-  const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;
+  const std_msgs__msg__Float64 *msg = (const std_msgs__msg__Float64 *)msgin;
   frontMotorController->setTargetVelocity(msg->data);
 }
 
 void back_subscription_callback(const void *msgin) {
   last_message_time = millis();
-  const std_msgs__msg__Float32 *msg = (const std_msgs__msg__Float32 *)msgin;
+  const std_msgs__msg__Float64 *msg = (const std_msgs__msg__Float64 *)msgin;
   backMotorController->setTargetVelocity(msg->data);
 }
 
@@ -106,7 +105,9 @@ void swapMotors(Settings &settings) {
 }
 
 void vTaskMotorFront(void *pvParameters) {
+  // Serial.println("vTaskMotorFront init start ");
   frontMotorController->initialize();
+  // Serial.println("vTaskMotorFront init end");
 
   // TickType_t xLastWakeTime = xTaskGetTickCount();
   while (true) {
@@ -128,39 +129,38 @@ void vTaskMotorBack(void *pvParameters) {
 void vTaskMicroROS(void *pvParameters) {
   const TickType_t xDelay = MOTOR_LOOP_PERIOD * portTICK_PERIOD_MS / 1000;
 
-  Serial.println("Wait for ping thread to succeed");
+  // Serial.println("Wait for ping thread to succeed");
 
   // Wait for ping thread to succeed
-  while (!connected) {
-    vTaskDelay(pdMS_TO_TICKS(100));
-  }
+  // while (!connected) {
+  //   vTaskDelay(pdMS_TO_TICKS(100));
+  // }
 
-  Serial.println("initializing micro ros inside vTaskMicroROS");
+  // Serial.println("initializing micro ros inside vTaskMicroROS");
 
-    // Initialize micro ros
-    Settings &settings = Settings::getInstance();
+  // Initialize micro ros
+  Settings &settings = Settings::getInstance();
 
   // Alloc memory
   allocator = rcl_get_default_allocator();
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
-  RCCHECK(rclc_node_init_default(&node, "deepdrive_motor_controller_node",
-                                 settings.getNamespace(), &support));
+  RCCHECK(rclc_node_init_default(&node, settings.getNamespace(), "", &support));
 
   // Front motor ROS setup
   RCCHECK(rclc_publisher_init_default(
       &front_publisher, &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64), "front/angle"));
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64), settings.getAngleTopic("front")));
   RCCHECK(rclc_subscription_init_default(
       &front_subscriber, &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32), "front/vel/cmd"));
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64), settings.getCmdVelTopic("front")));
 
   // Back motor ROS setup
   RCCHECK(rclc_publisher_init_default(
       &back_publisher, &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64), "back/angle"));
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64), settings.getAngleTopic("back")));
   RCCHECK(rclc_subscription_init_default(
       &back_subscriber, &node,
-      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32), "back/vel/cmd"));
+      ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float64), settings.getCmdVelTopic("back")));
 
   // TODO: Publish velocity output
 
@@ -179,7 +179,7 @@ void vTaskMicroROS(void *pvParameters) {
       rclc_executor_add_subscription(&executor, &back_subscriber, &back_sub_msg,
                                      back_subscription_callback, ON_NEW_DATA));
 
-  Serial.println("starting loop inside vTaskMicroROS");
+  // Serial.println("starting loop inside vTaskMicroROS");
 
   while (true) {
     // RCCHECK(rclc_executor_spin_some(&executor));
@@ -190,7 +190,7 @@ void vTaskMicroROS(void *pvParameters) {
 }
 
 bool pingAgent() {
-    return rmw_uros_ping_agent(UROS_TIMEOUT_PERIODIC, 1) == RMW_RET_OK;
+  return rmw_uros_ping_agent(UROS_TIMEOUT_PERIODIC, 1) == RMW_RET_OK;
 }
 
 void vTaskPing(void *pvParameters) {
@@ -209,28 +209,28 @@ void vTaskPing(void *pvParameters) {
       frontMotorController->setTargetVelocity(0);
       backMotorController->setTargetVelocity(0);
 
-      Serial.println("Error: No message received for " + String(elapsed) +
-                     "ms");
+      // Serial.println("Error: No message received for " + String(elapsed) + "ms");
 
       if (!pingAgent()) {
-        Serial.println("ping failed");
+        // Serial.println("ping failed attempt " + String(ping_failures));
 
         connected = false;
         ping_failures++;
 
         if (ping_failures >= AGENT_PING_ATTEMPTS_REBOOT) {
           // Reboot the board
-          Serial.println("Critical: Agent not available after retries. Rebooting");
+          // Serial.println("Critical: Agent not available after"  + String(ping_failures) + "attempts. Rebooting");
           abort();
           delay(100);
         }
       } else {
         // Initial ping successful to agent
         if (!connected) {
-          Serial.println("initial connection");
+          // Serial.println("initial connection");
 
           // Synchronize time with the agent
           rmw_uros_sync_session(1000);
+          last_message_time = millis();
 
           connected = true;
           ping_failures = 0;
@@ -247,8 +247,7 @@ void vTaskPing(void *pvParameters) {
 
 void setup() {
   Serial.begin(SERIAL_BAUD_RATE);
-  while (!Serial)
-    ; // Wait for serial port to connect (needed for some boards)
+  while (!Serial);  // Wait for serial port to connect (needed for some boards)
 
   // Read which side this is from EEPROM or wait for it to be set over serial
   Settings &settings = Settings::getInstance();
@@ -266,12 +265,11 @@ void setup() {
   //   abort();
   // }
 
-
   // Give some time in case we are reflashing the board
   // Turn this off for now, since we added the ping to wait for the agent
   // delay(BOARD_DELAY);
 
-  Serial.println("initial motors");
+  // Serial.println("initial motors");
 
 #ifdef INVERT_FRONT_MOTOR
   // Swap 2 pins
@@ -307,14 +305,19 @@ void setup() {
   swapMotors(settings);
 
   // Start the tasks
-  Serial.println("creating tasks");
+  // Serial.println("creating tasks");
   xTaskCreate(vTaskPing, "PingTask", 10000, NULL, 4, NULL);
-  Serial.println("done reating tasks");
+  // Serial.println("done reating tasks");
 
   // Wait for agent
   while (!connected) {
     vTaskDelay(pdMS_TO_TICKS(100));
   }
+
+  xTaskCreate(vTaskMicroROS, "MicroROSTask", 10000, NULL, 1, NULL);
+
+  // Give a little time in case we need to reflash
+  vTaskDelay(pdMS_TO_TICKS(1000));
 
   xTaskCreate(vTaskMotorFront, "MotorTaskFront", 10000, NULL, 16, NULL);
   xTaskCreate(vTaskMotorBack, "MotorTaskBack", 10000, NULL, 16, NULL);
@@ -323,10 +326,9 @@ void setup() {
   // logger = new RosoutLogger(&node, &support);
   // logger->println("ROS logger initialized");
 
-  xTaskCreate(vTaskMicroROS, "MicroROSTask", 10000, NULL, 1, NULL);
-  Serial.println("done creating micro ros task");
+  // Serial.println("done creating micro ros task");
 }
 
 void loop() {
-  // vTaskDelay(pdMS_TO_TICKS(100));
+  vTaskDelay(pdMS_TO_TICKS(1));
 }
